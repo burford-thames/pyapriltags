@@ -192,6 +192,7 @@ class Detector(object):
 
     families:           Tag families, separated with a space, default: tag36h11
     nthreads:           Number of threads, default: 1
+    max_hamming:        Maximum number of error bits to correct. Higher numbers decrease false negatives but increase false positives.
     quad_decimate:      Detection of quads can be done on a lower-resolution image, improving
                         speed at a cost of pose accuracy and a slight decrease in detection
                         rate. Decoding the binary payload is still done at full resolution,
@@ -228,6 +229,7 @@ class Detector(object):
     def __init__(self,
                  families: str = 'tag36h11',
                  nthreads: int = 1,
+                 max_hamming: int = 0,
                  quad_decimate: float = 2.0,
                  quad_sigma: float = 0.0,
                  refine_edges: int = 1,
@@ -239,6 +241,7 @@ class Detector(object):
         self.params: Dict[str, Any] = dict()
         self.params['families'] = families.split()
         self.params['nthreads'] = nthreads
+        self.params['max_hamming'] = max_hamming
         self.params['quad_decimate'] = quad_decimate
         self.params['quad_sigma'] = quad_sigma
         self.params['refine_edges'] = refine_edges
@@ -292,7 +295,7 @@ class Detector(object):
                 self.libc.apriltag_detector_add_family_bits(
                     self.tag_detector_ptr,
                     self.tag_families[family],
-                    2,
+                    self.params['max_hamming']
                 )
             else:
                 raise Exception(
